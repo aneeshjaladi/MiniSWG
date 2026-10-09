@@ -1,0 +1,1 @@
+"""MiniSWG core package."""
