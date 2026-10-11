@@ -1,0 +1,25 @@
+{
+  "blocked_categories": [
+    "malware",
+    "gambling"
+  ],
+  "categories": {
+    "malware": [
+      "*.badsite.com",
+      "evil.example"
+    ],
+    "gambling": [
+      "*.casino.com"
+    ],
+    "social": [
+      "*.facebook.com"
+    ]
+  },
+  "allowlist": [
+    "internal.company.com"
+  ],
+  "rate_limit": {
+    "requests_per_minute": 120,
+    "burst": 20
+  }
+}
