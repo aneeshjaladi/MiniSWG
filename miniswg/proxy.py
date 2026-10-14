@@ -566,10 +566,17 @@ def parse_args(args=None):
         action="store_true",
         help="Auto-reload policy file on modification",
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Quiet console output for high-throughput benchmarking",
+    )
     return parser.parse_args(args)
 
 async def main(args=None):
     parsed = parse_args(args)
+    if parsed.quiet:
+        logger.setLevel(logging.WARNING)
     setup_sighup_handler()
 
     global active_policy_path

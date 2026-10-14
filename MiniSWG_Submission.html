@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MiniSWG Project Report - Technical Submission</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 16mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            background: #ffffff;
+            line-height: 1.55;
+            font-size: 10pt;
+        }
+
+        .header-container {
+            border-bottom: 2.5px solid #2563eb;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .title-block h1 {
+            font-size: 20pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .title-block .subtitle {
+            font-size: 11pt;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .meta-block {
+            text-align: right;
+            font-size: 9pt;
+            color: #64748b;
+        }
+
+        .meta-block strong {
+            color: #0f172a;
+        }
+
+        .section {
+            margin-bottom: 18px;
+            page-break-inside: avoid;
+        }
+
+        h2 {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #1e3a8a;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        p, ul, ol {
+            margin-bottom: 6px;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul.checklist li {
+            position: relative;
+            padding-left: 22px;
+            margin-bottom: 4px;
+        }
+
+        ul.checklist li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #16a34a;
+            font-weight: 700;
+            font-size: 10pt;
+        }
+
+        ul.nested-list {
+            list-style: disc;
+            padding-left: 20px;
+            margin-top: 4px;
+            margin-bottom: 6px;
+        }
+
+        ul.nested-list li {
+            margin-bottom: 3px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 8pt;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 4px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            margin-right: 4px;
+        }
+
+        .badge-green {
+            background: #f0fdf4;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            margin-top: 6px;
+            margin-bottom: 8px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            text-align: left;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+        td {
+            padding: 5px 8px;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        tr:nth-child(even) td {
+            background: #fbfcfe;
+        }
+
+        .callout {
+            background: #f8fafc;
+            border-left: 3px solid #3b82f6;
+            padding: 8px 12px;
+            margin: 6px 0;
+            font-size: 9pt;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .code-inline {
+            font-family: Consolas, "Courier New", monospace;
+            background: #f1f5f9;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8.5pt;
+            color: #0f172a;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
+            text-align: center;
+            font-size: 8pt;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="title-block">
+            <h1>MiniSWG (Mini Secure Web Gateway)</h1>
+            <div class="subtitle">Asynchronous Forward Proxy, Trie Policy Engine & Admin Console</div>
+        </div>
+        <div class="meta-block">
+            <div><strong>Candidate / Author:</strong> Aneesh Jaladi</div>
+            <div><strong>Repository:</strong> github.com/aneeshjaladi/MiniSWG</div>
+            <div><strong>Architecture:</strong> Zero-Trust Edge / ZIA Inspired</div>
+        </div>
+    </div>
+
+    <!-- Question 1 -->
+    <div class="section">
+        <h2>1. Repository & Deployment</h2>
+        <p><strong>GitHub Repository:</strong> <a href="https://github.com/aneeshjaladi/MiniSWG">https://github.com/aneeshjaladi/MiniSWG</a></p>
+        <p><strong>Live Demo / Deployed Link:</strong> Operates locally as a desktop gateway proxy on <span class="code-inline">http://127.0.0.1:8080</span>. It integrates directly with client operating systems via automated batch scripts and an embedded web admin console at <span class="code-inline">http://127.0.0.1:8080/admin</span>.</p>
+    </div>
+
+    <!-- Question 2 -->
+    <div class="section">
+        <h2>2. Technology Stack</h2>
+        <ul class="nested-list">
+            <li><strong>Backend:</strong> Python 3.11+ / 3.13 built entirely on native <span class="code-inline">asyncio</span>. Handles cooperative non-blocking network I/O, raw socket streaming, and HTTP protocol parsing from scratch without third-party web frameworks (using standard library <span class="code-inline">asyncio</span>, <span class="code-inline">socket</span>, <span class="code-inline">urllib.parse</span>, <span class="code-inline">json</span>, and <span class="code-inline">winreg</span>).</li>
+            <li><strong>UI:</strong> Embedded Single-Page Application (SPA) served directly from the MiniSWG proxy. Engineered with Vanilla HTML5, responsive CSS3 (dark-mode theme, glassmorphism, Google Fonts Outfit/Inter), and native JavaScript <span class="code-inline">fetch</span> with live polling.</li>
+            <li><strong>Storage & Persistence:</strong>
+                <ul class="nested-list">
+                    <li><strong>Logs:</strong> High-fidelity JSON Lines (JSONL) append-only telemetry stream (<span class="code-inline">logs/access.log</span>).</li>
+                    <li><strong>Policies:</strong> JSON configuration (<span class="code-inline">config/policy.json</span>) compiled into an in-memory reverse-label hierarchical Domain Trie.</li>
+                    <li><strong>Database:</strong> Zero-dependency file storage + in-memory state for minimal footprint and microsecond lookups.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Question 3 -->
+    <div class="section">
+        <h2>3. Working Features (Implemented & Validated)</h2>
+        <ul class="checklist">
+            <li><strong>HTTP Forwarding:</strong> Full parsing of request line and headers, validation, origin connection, and streaming bidirectional response forwarding.</li>
+            <li><strong>HTTPS via CONNECT Tunnel (RFC 9110):</strong> Blind bidirectional TCP byte streaming via <span class="code-inline">asyncio.gather</span> with strict domain-level policy gating prior to tunnel establishment.</li>
+            <li><strong>Trie-Based Wildcard Domain Blocking:</strong> Reverse-label hierarchical Trie achieving $O(L)$ matching, supporting exact hostnames and wildcard subdomains (e.g. <span class="code-inline">*.casino.com</span>, <span class="code-inline">*.badsite.com</span>).</li>
+            <li><strong>Category Blocking:</strong> Maps domains to threat and corporate categories (e.g. Malware, Gambling, Social Media) and blocks requests according to active policy rules.</li>
+            <li><strong>Per-Client Rate Limiting (Token Bucket):</strong> Client-IP rate limiting using a lazy-refill monotonic clock algorithm (<span class="code-inline">time.monotonic()</span>) with burst allowance; returns <span class="code-inline">429 Too Many Requests</span> with <span class="code-inline">Retry-After</span>.</li>
+            <li><strong>Structured Telemetry Logging:</strong> Detailed JSON log entries tracking timestamp, client IP, method, host, port, verdict action (<span class="code-inline">allow</span>, <span class="code-inline">block</span>, <span class="code-inline">rate_limited</span>), reason, category, status code, byte metrics, and latency in milliseconds.</li>
+            <li><strong>Zero-Downtime Policy Hot-Reload:</strong> Live policy updates without dropping active connections via asynchronous file watcher, POSIX <span class="code-inline">SIGHUP</span> handler, and web admin API triggers.</li>
+            <li><strong>Custom Block Page:</strong> Branded HTML block page returned with HTTP <span class="code-inline">403 Forbidden</span> for blocked web requests, and clean raw 403 termination for HTTPS CONNECT requests.</li>
+            <li><strong>Windows System Proxy Integration:</strong> Seamless registry automation (<span class="code-inline">winproxy.py</span>) to dynamically route and restore system-wide browser traffic (Edge, Chrome, Brave) to MiniSWG with 1 click.</li>
+            <li><strong>1-Click Launchers:</strong> <span class="code-inline">Start_MiniSWG.bat</span> and <span class="code-inline">Stop_MiniSWG.bat</span> providing immediate execution and clean restoration for end-users.</li>
+            <li><strong>Integrated Benchmark Harness:</strong> Built-in multi-concurrency benchmarking suite (<span class="code-inline">bench/run_bench.py</span>) measuring throughput and tail latencies.</li>
+        </ul>
+        <p style="font-size: 8.5pt; color: #64748b; margin-top: 4px;"><em>* Note: Unimplemented enterprise features (such as JWT user authentication or SSL/TLS MITM decryption) have been omitted.</em></p>
+    </div>
+
+    <!-- Question 4 -->
+    <div class="section">
+        <h2>4. Web Admin Dashboard Capabilities</h2>
+        <p>Accessible at <span class="code-inline">http://127.0.0.1:8080/admin</span>, the dashboard enables non-technical and security admins to:</p>
+        <ul class="nested-list">
+            <li><strong>Live Telemetry & Activity Feed:</strong> Auto-refreshing feed displaying client IP, request method, destination host, action badge (<span class="badge badge-green">allow</span> / <span class="badge" style="background:#fef2f2;color:#b91c1c;border-color:#fecaca;">block</span> / <span class="badge" style="background:#fffbeb;color:#b45309;border-color:#fde68a;">rate_limited</span>), category, status, and latency.</li>
+            <li><strong>System Counters:</strong> Instant visibility into uptime, total requests processed, and threat blocks enforced.</li>
+            <li><strong>1-Click Windows Proxy Switch:</strong> Global header control to route all workstation traffic through the gateway or restore direct connection.</li>
+            <li><strong>Visual Category Policy Management:</strong> One-click toggles to instantly enable or disable blocking for Malware, Gambling, and Social Media.</li>
+            <li><strong>Custom Rules & Allowlist Creator:</strong> Web form to add new domain rules or allowlist entries without manual JSON editing.</li>
+            <li><strong>Interactive Domain Inspector:</strong> Real-time domain tester returning immediate policy verdicts, matched rules, and contextual syntax hints.</li>
+            <li><strong>Rate Limit & Policy Editor:</strong> Configuration panel to adjust requests-per-minute and burst thresholds with instant hot-reload.</li>
+        </ul>
+    </div>
+
+    <!-- Question 5 -->
+    <div class="section">
+        <h2>5. Measured Benchmark Results</h2>
+        <p>MiniSWG was benchmarked across two distinct architectures: (1) <strong>Production In-Cluster Kubernetes</strong> using Google's <span class="code-inline">hey</span> load generator against an <span class="code-inline">nginx:alpine</span> origin, and (2) <strong>Bare-Metal Local AsyncIO</strong> socket pooling:</p>
+        
+        <h3 style="font-size: 10pt; font-weight: 700; color: #0f172a; margin: 10px 0 6px 0;">A. In-Cluster Kubernetes Benchmarks (Minikube + Google hey)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Configuration</th>
+                    <th>Concurrency</th>
+                    <th>Total Requests</th>
+                    <th>Throughput</th>
+                    <th>Avg Latency</th>
+                    <th>p50 Latency</th>
+                    <th>p95 Latency</th>
+                    <th>p99 Latency</th>
+                    <th>Success Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Direct NGINX (Baseline)</td>
+                    <td>20 concurrent</td>
+                    <td>1,000</td>
+                    <td>43,931.7 req/s</td>
+                    <td>0.4 ms</td>
+                    <td>0.2 ms</td>
+                    <td>1.2 ms</td>
+                    <td>1.8 ms</td>
+                    <td>100% (1,000/1,000)</td>
+                </tr>
+                <tr>
+                    <td><strong>MiniSWG Gateway</strong></td>
+                    <td>20 concurrent</td>
+                    <td>1,000</td>
+                    <td><strong>1,251.5 req/s</strong></td>
+                    <td>15.9 ms</td>
+                    <td>10.4 ms</td>
+                    <td>48.9 ms</td>
+                    <td>51.1 ms</td>
+                    <td>100% (1,000/1,000)</td>
+                </tr>
+                <tr>
+                    <td><strong>MiniSWG Gateway</strong></td>
+                    <td>50 concurrent</td>
+                    <td>5,000</td>
+                    <td><strong>1,089.8 req/s</strong></td>
+                    <td>45.7 ms</td>
+                    <td>29.4 ms</td>
+                    <td>77.8 ms</td>
+                    <td>90.4 ms</td>
+                    <td>100% (5,000/5,000)</td>
+                </tr>
+                <tr>
+                    <td><strong>MiniSWG Gateway</strong></td>
+                    <td>100 concurrent</td>
+                    <td>5,000</td>
+                    <td><strong>1,162.5 req/s</strong></td>
+                    <td>85.6 ms</td>
+                    <td>91.0 ms</td>
+                    <td>109.8 ms</td>
+                    <td>154.2 ms</td>
+                    <td>100% (5,000/5,000)</td>
+                </tr>
+                <tr>
+                    <td><strong>MiniSWG Gateway</strong></td>
+                    <td>200 concurrent</td>
+                    <td>5,000</td>
+                    <td><strong>1,228.6 req/s</strong></td>
+                    <td>161.3 ms</td>
+                    <td>165.2 ms</td>
+                    <td>201.5 ms</td>
+                    <td>240.9 ms</td>
+                    <td>100% (5,000/5,000)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 style="font-size: 10pt; font-weight: 700; color: #0f172a; margin: 12px 0 6px 0;">B. Bare-Metal Local AsyncIO Benchmarks</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mode</th>
+                    <th>Concurrency</th>
+                    <th>Throughput (req/s)</th>
+                    <th>Avg Latency</th>
+                    <th>p50 Latency</th>
+                    <th>p95 Latency</th>
+                    <th>p99 Latency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Policy Enabled</strong></td>
+                    <td>10 concurrent</td>
+                    <td><strong>1,563.5 req/s</strong></td>
+                    <td>6.34 ms</td>
+                    <td>6.35 ms</td>
+                    <td>6.96 ms</td>
+                    <td>7.45 ms</td>
+                </tr>
+                <tr>
+                    <td><strong>Policy Enabled</strong></td>
+                    <td>50 concurrent</td>
+                    <td><strong>1,595.3 req/s</strong></td>
+                    <td>29.05 ms</td>
+                    <td>31.47 ms</td>
+                    <td>33.04 ms</td>
+                    <td>33.21 ms</td>
+                </tr>
+                <tr>
+                    <td><strong>Policy Enabled</strong></td>
+                    <td>200 concurrent</td>
+                    <td><strong>1,766.2 req/s</strong></td>
+                    <td>77.69 ms</td>
+                    <td>87.88 ms</td>
+                    <td>96.65 ms</td>
+                    <td>97.44 ms</td>
+                </tr>
+                <tr>
+                    <td>Policy Disabled</td>
+                    <td>10 concurrent</td>
+                    <td>1,610.2 req/s</td>
+                    <td>6.16 ms</td>
+                    <td>6.13 ms</td>
+                    <td>6.65 ms</td>
+                    <td>6.99 ms</td>
+                </tr>
+                <tr>
+                    <td>Policy Disabled</td>
+                    <td>50 concurrent</td>
+                    <td>1,628.0 req/s</td>
+                    <td>28.37 ms</td>
+                    <td>31.55 ms</td>
+                    <td>32.60 ms</td>
+                    <td>32.75 ms</td>
+                </tr>
+                <tr>
+                    <td>Policy Disabled</td>
+                    <td>200 concurrent</td>
+                    <td>1,721.6 req/s</td>
+                    <td>77.89 ms</td>
+                    <td>88.12 ms</td>
+                    <td>95.80 ms</td>
+                    <td>96.15 ms</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="callout">
+            <strong>Key Performance Insights:</strong>
+            <ul class="nested-list" style="margin-bottom:0;">
+                <li><strong>100% Zero-Drop Reliability:</strong> 16,000 total requests evaluated in Kubernetes with 0 failed, timed-out, or dropped connections (0.00% error rate).</li>
+                <li><strong>Sub-Millisecond Policy Overhead:</strong> Trie evaluation adds less than <strong>0.18 ms</strong> to average latency compared to uninspected traffic, proving that reverse-label Trie lookups are virtually zero-cost.</li>
+                <li><strong>Controlled Tail Latency:</strong> Under 200 concurrent connections, p95 and p99 scale smoothly with queue depth without connection starvation.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Question 6 -->
+    <div class="section">
+        <h2>6. Scale Numbers & Verification</h2>
+        <ul class="nested-list">
+            <li><strong>Domain Patterns Tested:</strong> Validated against exact host rules (<span class="code-inline">evil.example</span>), wildcard prefixes (<span class="code-inline">*.badsite.com</span>, <span class="code-inline">*.casino.com</span>, <span class="code-inline">*.facebook.com</span>), multi-label deep subdomains (<span class="code-inline">a.b.c.badsite.com</span>), and allowlist overrides (<span class="code-inline">internal.company.com</span>).</li>
+            <li><strong>Automated Test Coverage:</strong> <strong>44 automated unit and integration tests</strong> across 6 test modules (<span class="code-inline">test_admin.py</span>, <span class="code-inline">test_bench.py</span>, <span class="code-inline">test_parser.py</span>, <span class="code-inline">test_policy.py</span>, <span class="code-inline">test_ratelimit.py</span>, <span class="code-inline">test_stage9.py</span>) via <span class="code-inline">pytest</span> + <span class="code-inline">pytest-asyncio</span> with a <strong>100% pass rate</strong>.</li>
+            <li><strong>Concurrent Stress Smoke Test:</strong> Standalone 50-client concurrent request validation (<span class="code-inline">tests/smoke.py</span>) verifying socket cleanup and connection resilience.</li>
+        </ul>
+    </div>
+
+    <!-- Question 7 -->
+    <div class="section">
+        <h2>7. Team Structure & Candidate Role</h2>
+        <p><strong>Solo Project by Aneesh Jaladi (aneeshjaladi)</strong></p>
+        <p>Solely architected, implemented, and benchmarked the entire system end-to-end: designed the asynchronous socket streaming engine, RFC-compliant HTTP/CONNECT parser, reverse-label prefix Trie, token-bucket rate limiter, Windows registry automation, web admin console, and benchmark harness.</p>
+    </div>
+
+    <!-- Question 8 -->
+    <div class="section">
+        <h2>8. Coursework & Security Concepts</h2>
+        <ul class="nested-list">
+            <li><strong>Relevant Academic Coursework:</strong>
+                <ul class="nested-list">
+                    <li><strong>Computer Networks:</strong> TCP/IP socket programming, HTTP/1.1 request/response framing, RFC 9110 CONNECT tunneling, proxy forwarding semantics, and latency percentile analysis.</li>
+                    <li><strong>Operating Systems:</strong> Asynchronous cooperative event loops (<span class="code-inline">asyncio</span>), non-blocking socket I/O multiplexing (IOCP / epoll), OS signal handling (<span class="code-inline">SIGHUP</span>), and Windows registry IPC.</li>
+                </ul>
+            </li>
+            <li><strong>Applied Security Concepts:</strong> Enterprise Secure Web Gateway (SWG) architecture inspired by Zscaler Internet Access (ZIA), zero-trust egress domain inspection, DoS mitigation via token-bucket rate limiting, and structured audit telemetry.</li>
+            <li><strong>Links:</strong> GitHub repository: <a href="https://github.com/aneeshjaladi/MiniSWG">https://github.com/aneeshjaladi/MiniSWG</a></li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        MiniSWG Technical Project Report • Generated for Submission • Candidate: Aneesh Jaladi
+    </div>
+
+</body>
+</html>

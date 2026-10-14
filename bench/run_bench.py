@@ -310,7 +310,7 @@ def generate_markdown_report(results: List[BenchmarkResult]) -> str:
     report = f"""# MiniSWG Benchmark Results
 
 ## Overview
-- **Payload Size**: Fixed 1KB (1024 bytes) response from local asyncio origin server.
+- **Payload Size**: Fixed 1KB (1024 bytes) response from origin server.
 - **Protocol**: HTTP/1.1 forwarded through MiniSWG proxy.
 - **Measured Metrics**: Requests/sec, Average Latency, p50, p95, and p99 latency (in milliseconds).
 - **Concurrency Levels**: 10, 50, and 200 concurrent connections.
@@ -324,8 +324,8 @@ def generate_markdown_report(results: List[BenchmarkResult]) -> str:
 
 ## Key Observations
 1. **Trie Lookup Efficiency**: The trie evaluation incurs minimal overhead (sub-millisecond), meaning domain matching is highly efficient and does not introduce latency bottlenecks.
-2. **Concurrency Scaling**: Throughput scales efficiently from concurrency 10 to 50 and 200, taking advantage of asyncio's cooperative non-blocking I/O.
-3. **Tail Latency**: Even under high concurrency (200 concurrent clients), p95 and p99 latencies remain controlled without dropped requests or connection failures.
+2. **Concurrency Scaling**: Throughput scales efficiently across concurrency levels, taking advantage of asyncio's cooperative non-blocking I/O.
+3. **Tail Latency**: Latencies remain controlled without dropped requests or connection failures.
 """
     return report
 
@@ -335,60 +335,111 @@ async def run_suite(
     total_requests: int,
     modes: List[str],
     output_path: str = "bench/results.md",
+    external_proxy: Optional[str] = None,
+    target_origin: Optional[str] = None,
 ) -> List[BenchmarkResult]:
-    # Start local origin server
-    origin = LocalOriginServer()
-    origin_port = await origin.start()
-    print(f"[*] Local origin server running on 127.0.0.1:{origin_port} (1KB payload)", flush=True)
+    origin = None
+    if target_origin:
+        origin_host, origin_port_str = target_origin.split(":")
+        origin_port = int(origin_port_str)
+        print(f"[*] Using external origin server at {origin_host}:{origin_port}", flush=True)
+    else:
+        # Start local origin server
+        origin = LocalOriginServer(host="0.0.0.0")
+        origin_port = await origin.start()
+        origin_host = "127.0.0.1"
+        print(f"[*] Local origin server running on {origin_host}:{origin_port} (1KB payload)", flush=True)
 
     results: List[BenchmarkResult] = []
 
     try:
-        for mode in modes:
-            disable_policy = (mode == "Policy Disabled")
+        if external_proxy:
+            proxy_host, proxy_port_str = external_proxy.split(":")
+            proxy_port = int(proxy_port_str)
             print(f"\n==========================================", flush=True)
-            print(f"[*] Starting proxy in mode: {mode}", flush=True)
+            print(f"[*] Benchmarking external proxy at {proxy_host}:{proxy_port}", flush=True)
             print(f"==========================================", flush=True)
 
-            proxy_mgr = ProxyProcessManager(disable_policy=disable_policy)
-            proxy_mgr.start()
-
-            ready = await proxy_mgr.wait_until_ready(timeout=5.0)
-            if not ready:
-                print(f"[!] Failed to connect to proxy on port {proxy_mgr.port}", flush=True)
-                proxy_mgr.stop()
-                continue
-
-            print(f"[*] Proxy running on 127.0.0.1:{proxy_mgr.port}", flush=True)
-
+            # Test connectivity
             try:
-                for c in concurrencies:
-                    print(f"[*] Benchmarking concurrency={c}, requests={total_requests}...", flush=True)
-                    res = await run_benchmark_load(
-                        proxy_host="127.0.0.1",
-                        proxy_port=proxy_mgr.port,
-                        origin_host="127.0.0.1",
-                        origin_port=origin_port,
-                        concurrency=c,
-                        total_requests=total_requests,
-                        mode_name=mode,
-                    )
-                    results.append(res)
-                    print(
-                        f"    -> {res.requests_per_sec:.1f} req/s | "
-                        f"avg: {res.avg_latency_ms:.2f}ms | "
-                        f"p50: {res.p50_ms:.2f}ms | "
-                        f"p95: {res.p95_ms:.2f}ms | "
-                        f"p99: {res.p99_ms:.2f}ms "
-                        f"({res.successful_requests}/{res.total_requests} ok)",
-                        flush=True,
-                    )
-            finally:
-                proxy_mgr.stop()
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(proxy_host, proxy_port), timeout=5.0
+                )
+                writer.close()
+                await writer.wait_closed()
+                print(f"[+] Successfully connected to external proxy {proxy_host}:{proxy_port}", flush=True)
+            except Exception as e:
+                print(f"[!] Cannot reach external proxy at {proxy_host}:{proxy_port}: {e}", flush=True)
+                return []
+
+            for c in concurrencies:
+                print(f"[*] Benchmarking concurrency={c}, requests={total_requests}...", flush=True)
+                res = await run_benchmark_load(
+                    proxy_host=proxy_host,
+                    proxy_port=proxy_port,
+                    origin_host=origin_host,
+                    origin_port=origin_port,
+                    concurrency=c,
+                    total_requests=total_requests,
+                    mode_name="Minikube / External Proxy",
+                )
+                results.append(res)
+                print(
+                    f"    -> {res.requests_per_sec:.1f} req/s | "
+                    f"avg: {res.avg_latency_ms:.2f}ms | "
+                    f"p50: {res.p50_ms:.2f}ms | "
+                    f"p95: {res.p95_ms:.2f}ms | "
+                    f"p99: {res.p99_ms:.2f}ms "
+                    f"({res.successful_requests}/{res.total_requests} ok)",
+                    flush=True,
+                )
+        else:
+            for mode in modes:
+                disable_policy = (mode == "Policy Disabled")
+                print(f"\n==========================================", flush=True)
+                print(f"[*] Starting proxy in mode: {mode}", flush=True)
+                print(f"==========================================", flush=True)
+
+                proxy_mgr = ProxyProcessManager(disable_policy=disable_policy)
+                proxy_mgr.start()
+
+                ready = await proxy_mgr.wait_until_ready(timeout=5.0)
+                if not ready:
+                    print(f"[!] Failed to connect to proxy on port {proxy_mgr.port}", flush=True)
+                    proxy_mgr.stop()
+                    continue
+
+                print(f"[*] Proxy running on 127.0.0.1:{proxy_mgr.port}", flush=True)
+
+                try:
+                    for c in concurrencies:
+                        print(f"[*] Benchmarking concurrency={c}, requests={total_requests}...", flush=True)
+                        res = await run_benchmark_load(
+                            proxy_host="127.0.0.1",
+                            proxy_port=proxy_mgr.port,
+                            origin_host="127.0.0.1",
+                            origin_port=origin_port,
+                            concurrency=c,
+                            total_requests=total_requests,
+                            mode_name=mode,
+                        )
+                        results.append(res)
+                        print(
+                            f"    -> {res.requests_per_sec:.1f} req/s | "
+                            f"avg: {res.avg_latency_ms:.2f}ms | "
+                            f"p50: {res.p50_ms:.2f}ms | "
+                            f"p95: {res.p95_ms:.2f}ms | "
+                            f"p99: {res.p99_ms:.2f}ms "
+                            f"({res.successful_requests}/{res.total_requests} ok)",
+                            flush=True,
+                        )
+                finally:
+                    proxy_mgr.stop()
 
     finally:
-        await origin.stop()
-        print("\n[*] Origin server stopped.", flush=True)
+        if origin:
+            await origin.stop()
+            print("\n[*] Origin server stopped.", flush=True)
 
     # Print results table
     print("\n" + "=" * 50, flush=True)
@@ -409,6 +460,14 @@ async def run_suite(
 
 def main():
     parser = argparse.ArgumentParser(description="MiniSWG Benchmark Suite")
+    parser.add_argument(
+        "--external-proxy",
+        help="Target existing running proxy (e.g. 127.0.0.1:8080 or minikube-ip:30080)",
+    )
+    parser.add_argument(
+        "--origin",
+        help="Target existing origin server (e.g. host.docker.internal:8000 or origin-service:80)",
+    )
     parser.add_argument(
         "--no-policy",
         action="store_true",
@@ -454,9 +513,12 @@ def main():
             total_requests=args.requests,
             modes=modes,
             output_path=args.output,
+            external_proxy=args.external_proxy,
+            target_origin=args.origin,
         )
     )
 
 
 if __name__ == "__main__":
     main()
+
